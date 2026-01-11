@@ -1,0 +1,8 @@
+{
+  "projectId": "9e70a02b-fe82-449e-87d8-161361fb0ad2",
+  "createdAt": 1736113200000,
+  "startupCommands": [
+    "npm run web",
+    "node api/index.js"
+  ]
+}
