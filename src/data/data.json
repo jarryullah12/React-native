@@ -1,0 +1,133 @@
+{
+  "onboarding": [
+    {
+      "id": 1,
+      "title": "Discover products easily",
+      "description": "Explore thousands of items tailored to your style with our smart search.",
+      "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuCBIhCG5PaN63k3zl9byDFIUT23RzfOuhF5MmOcMdwbDxBtuoWz02G-SyDISz_n24890-bxGqJ5VjrR0bPDqWUiKGVQuzIo2zJBEHnFEjZ-RKG887dUQJxHLxMLOUpdI4u1coqZ_Fdr6ZZvPncwmot0VnSexFvgBWkCNig0dnqvOY_a9wxNBcn2zLq1dPhXu0VXGxEVqJQoY11odO5nzlQCUO6ApvZ0q_UMtvJjJe20bYdd-UKXE0SMtQHsnC541iaKP4-vB-Krhos"
+    }
+  ],
+  "banners": [
+    {
+      "id": 1,
+      "title": "Summer Sale",
+      "subtitle": "Up to 50% Off on beachwear",
+      "image": "https://static.vecteezy.com/system/resources/thumbnails/013/442/573/small/wristwatch-analog-classic-brown-leather-strap-watch-png.png",
+      "discount": "50%"
+    },
+    {
+      "id": 2,
+      "title": "Tech Week",
+      "subtitle": "Latest gadgets at best prices",
+      "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop",
+      "discount": "30%"
+    }
+  ],
+  "categories": [
+    { "id": 1, "name": "Electronics", "icon": "devices", "color": "#135bec", "bg": "#eff6ff" },
+    { "id": 2, "name": "Fashion", "icon": "checkroom", "color": "#ec4899", "bg": "#fdf2f8" },
+    { "id": 3, "name": "Grocery", "icon": "local-grocery-store", "color": "#16a34a", "bg": "#f0fdf4" },
+    { "id": 4, "name": "Beauty", "icon": "face", "color": "#9333ea", "bg": "#faf5ff" },
+    { "id": 5, "name": "Home", "icon": "chair", "color": "#ea580c", "bg": "#fff7ed" }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "categoryId": 1,
+      "name": "Nike Air Zoom Pegasus 39",
+      "description": "The Air Zoom Pegasus returns to put a spring in your step. Responsive cushioning provides a balanced ride for everyday runs.",
+      "price": 120.0,
+      "oldPrice": 150.0,
+      "rating": 4.8,
+      "reviews": 120,
+      "badge": "20% OFF",
+      "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=500&auto=format&fit=crop"
+    },
+    {
+      "id": 2,
+      "categoryId": 1,
+      "name": "Premium Wireless Headphones",
+      "description": "High-quality noise-cancelling headphones with 40-hour battery life and superior sound clarity.",
+      "price": 299.0,
+      "oldPrice": 350.0,
+      "rating": 4.9,
+      "reviews": 85,
+      "badge": "HOT",
+      "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=500&auto=format&fit=crop"
+    },
+    {
+      "id": 3,
+      "categoryId": 2,
+      "name": "Classic Denim Jacket",
+      "description": "Vintage style denim jacket made with 100% organic cotton. Durable and stylish for all seasons.",
+      "price": 60.0,
+      "oldPrice": 80.0,
+      "rating": 4.5,
+      "reviews": 210,
+      "badge": "NEW",
+      "image": "https://images.unsplash.com/photo-1551537482-f2075a1d41f2?q=80&w=500&auto=format&fit=crop"
+    },
+    {
+      "id": 4,
+      "categoryId": 1,
+      "name": "Smart Watch Series 7",
+      "description": "Track your health, fitness, and stay connected with the most advanced smart watch yet.",
+      "price": 199.0,
+      "oldPrice": null,
+      "rating": 4.7,
+      "reviews": 320,
+      "badge": null,
+      "image": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=500&auto=format&fit=crop"
+    },
+    {
+      "id": 5,
+      "categoryId": 2,
+      "name": "Minimalist Leather Backpack",
+      "description": "Handcrafted tan leather backpack with a 20L capacity. Perfect for work and travel.",
+      "price": 145.0,
+      "oldPrice": 175.0,
+      "rating": 4.6,
+      "reviews": 56,
+      "badge": "15% OFF",
+      "image": "https://images.unsplash.com/photo-1547949003-9792a18a2601?q=80&w=500&auto=format&fit=crop"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "name": "Jarry Ullah",
+      "email": "jarryullah46@gmail.com",
+      "password": "123",
+      "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
+      "address": "123 Innovation Dr, Tech City, CA 94043",
+      "phone": "+1 (555) 123-4567"
+    },
+    {
+      "id": 2,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "password456",
+      "avatar": "https://randomuser.me/api/portraits/men/1.jpg",
+      "address": "456 Market St, San Francisco, CA 94105",
+      "phone": "+1 (555) 987-6543"
+    },
+    {
+      "id": 3,
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "password": "password789",
+      "avatar": "https://randomuser.me/api/portraits/women/1.jpg",
+      "address": "789 Pine Ave, Seattle, WA 98101",
+      "phone": "+1 (555) 456-7890"
+    }
+  ],
+  "user": {
+    "id": 1,
+    "name": "Jarry Ullah",
+    "email": "jarryullah46@gmail.com",
+    "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
+    "address": "123 Innovation Dr, Tech City, CA 94043",
+    "phone": "+1 (555) 123-4567"
+  },
+  "orders": []
+}
