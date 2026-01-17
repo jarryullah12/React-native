@@ -1,23 +1,25 @@
 {
   "expo": {
-    "name": "MyNewProject",
+    "name": "Shoply",
     "slug": "MyNewProject",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mynewproject",
+    "scheme": "Shoply",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jarryullah46.Shoply"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#135bec",
-        "foregroundImage": "./assets/images/android-icon-foreground.png"
+        "foregroundImage": "./assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.jarryullah46.Shoply"
     },
     "web": {
       "output": "static",
