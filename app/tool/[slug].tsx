@@ -22,23 +22,34 @@ import {
 import { toolsBySlug } from '@/data/tools';
 import {
     analyzeWebsite,
+    buildKeywordIntentBreakdown,
     buildKeywordDensity,
     buildUtmUrl,
     checkBrokenLinks,
     checkPlagiarism,
     checkServerStatus,
+    clusterKeywords,
     countWords,
     estimateDomainAuthority,
+    expandSemanticKeywords,
+    findInternalLinkOpportunities,
     formatJson,
+    generateAltTextSuggestions,
     generateBlogDraft,
+    generateMetaDescriptionIdeas,
     generateMetaTags,
+    generateOnPageSeoChecklist,
     generateRobotsTxt,
+    generateSeoContentOutline,
+    generateSeoSlug,
+    generateSeoTitleIdeas,
     generateSitemapXml,
     getPublicIp,
     inspectBacklinks,
     md5,
     minifyCss,
     minifyJs,
+    normalizeUrl,
     rewriteArticle,
     validateSchemaMarkup,
 } from '@/lib/tool-utils';
@@ -154,6 +165,174 @@ function getInitialForm(slug: string) {
       json: '{ "name": "OptiSEO", "type": "toolkit", "features": ["analyzer", "generator"] }',
     },
     'md5-generator': { text: 'Hash this text' },
+    'title-tag-preview': {
+      title: 'Technical SEO Checklist for Startups | OptiSEO',
+      url: 'https://example.com/blog/technical-seo-checklist',
+    },
+    'meta-description-checker': {
+      description: 'Learn how to run a technical SEO audit with a practical checklist, clear priorities, and implementation steps for better rankings.',
+    },
+    'open-graph-generator': {
+      title: 'Technical SEO Checklist for Startups',
+      description: 'A practical technical SEO checklist to improve indexing, speed, and visibility.',
+      url: 'https://example.com/blog/technical-seo-checklist',
+      image: 'https://example.com/images/technical-seo-cover.jpg',
+      type: 'article',
+    },
+    'twitter-card-generator': {
+      title: 'Technical SEO Checklist for Startups',
+      description: 'Follow this checklist to fix crawl issues and improve visibility.',
+      url: 'https://example.com/blog/technical-seo-checklist',
+      image: 'https://example.com/images/technical-seo-cover.jpg',
+      card: 'summary_large_image',
+    },
+    'canonical-url-checker': {
+      pageUrl: 'https://example.com/blog/technical-seo-checklist?ref=home',
+      canonicalUrl: 'https://example.com/blog/technical-seo-checklist',
+    },
+    'hreflang-generator': {
+      mappings: 'en|https://example.com/en/technical-seo-checklist\nur|https://example.com/ur/technical-seo-checklist',
+      xDefault: 'https://example.com/technical-seo-checklist',
+    },
+    'hreflang-validator': {
+      mappings: 'en|https://example.com/en/technical-seo-checklist\nur|https://example.com/ur/technical-seo-checklist',
+    },
+    'redirect-checker': { url: 'http://example.com' },
+    'http-header-checker': { url: 'https://example.com' },
+    'meta-robots-checker': { url: 'https://example.com' },
+    'x-robots-tag-checker': { url: 'https://example.com' },
+    'sitemap-validator': {
+      sitemap: '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://example.com/</loc></url>\n  <url><loc>https://example.com/blog</loc></url>\n</urlset>',
+    },
+    'sitemap-url-extractor': {
+      sitemap: '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://example.com/</loc></url>\n  <url><loc>https://example.com/blog</loc></url>\n</urlset>',
+    },
+    'robots-tester': {
+      robotsTxt: 'User-agent: *\nDisallow: /admin\nAllow: /',
+      testUrl: 'https://example.com/admin',
+    },
+    'serp-snippet-optimizer': {
+      title: 'Technical SEO Checklist for Startups',
+      description: 'Improve crawlability, indexing, and page speed using this practical technical SEO checklist.',
+      url: 'https://example.com/blog/technical-seo-checklist',
+    },
+    'keyword-suggestion-generator': {
+      keyword: 'technical seo',
+      count: '10',
+    },
+    'long-tail-keyword-finder': {
+      keyword: 'technical seo',
+      count: '12',
+    },
+    'keyword-difficulty-estimator': {
+      keyword: 'technical seo checklist',
+      domainAuthority: '45',
+    },
+    'search-intent-classifier': {
+      keyword: 'best technical seo tools',
+    },
+    'faq-schema-generator': {
+      faqPairs: 'What is technical SEO?|Technical SEO improves crawlability, indexing, and site performance.\nHow often should I do an SEO audit?|Run a focused audit every month and a full audit every quarter.',
+    },
+    'product-schema-generator': {
+      name: 'SEO Audit Template',
+      description: 'A practical SEO audit template for marketers and founders.',
+      brand: 'OptiSEO',
+      sku: 'SEO-AUDIT-001',
+      price: '29',
+      currency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: 'https://example.com/products/seo-audit-template',
+    },
+    'article-schema-generator': {
+      headline: 'Technical SEO Checklist for Startups',
+      description: 'A practical guide to improve technical SEO fundamentals.',
+      author: 'OptiSEO Team',
+      publishedDate: '2026-01-10',
+      url: 'https://example.com/blog/technical-seo-checklist',
+    },
+    'local-business-schema-generator': {
+      name: 'OptiSEO Agency',
+      phone: '+1-555-123-4567',
+      address: '123 Market St',
+      city: 'San Francisco',
+      country: 'US',
+      website: 'https://example.com',
+    },
+    'breadcrumb-schema-generator': {
+      items: 'Home|https://example.com\nBlog|https://example.com/blog\nTechnical SEO Checklist|https://example.com/blog/technical-seo-checklist',
+    },
+    'internal-link-suggestor': {
+      targetKeywords: 'technical seo\nsite audit\ncore web vitals',
+      existingPages: 'https://example.com/blog/on-page-seo|On-Page SEO Guide\nhttps://example.com/blog/core-web-vitals|Core Web Vitals Basics\nhttps://example.com/blog/seo-audit|SEO Audit Template',
+    },
+    'anchor-text-analyzer': {
+      anchors: 'technical seo checklist\nclick here\nbest technical seo tools\nread more\nOptiSEO audit service',
+      targetKeyword: 'technical seo checklist',
+    },
+    'page-speed-hint-checker': {
+      lcp: '3.2',
+      cls: '0.18',
+      inp: '280',
+      imageWeightKb: '1800',
+      jsWeightKb: '900',
+    },
+    'core-web-vitals-estimator': {
+      lcp: '2.8',
+      cls: '0.12',
+      inp: '260',
+    },
+    'mobile-friendly-checklist': {
+      viewport: 'yes',
+      responsive: 'yes',
+      tapTargets: 'yes',
+      fontSize: '16',
+    },
+    'ssl-https-checker': { url: 'https://example.com' },
+    'seo-title-idea-generator': {
+      topic: 'Technical SEO Checklist',
+      keyword: 'technical seo checklist',
+      brand: 'OptiSEO',
+      count: '5',
+    },
+    'meta-description-idea-generator': {
+      topic: 'Technical SEO Checklist',
+      keyword: 'technical seo checklist',
+      cta: 'Read the full checklist now.',
+      count: '5',
+    },
+    'seo-slug-generator': {
+      title: 'Technical SEO Checklist for Startups',
+    },
+    'keyword-clusterer': {
+      keywords: 'technical seo checklist\nseo audit template\nseo audit guide\nkeyword research strategy\nkeyword research tools',
+    },
+    'keyword-intent-breakdown': {
+      keywords: 'what is technical seo\nbest seo tools\nbuy seo audit service\nseo agency near me',
+    },
+    'semantic-keyword-expander': {
+      seedKeyword: 'technical seo',
+      modifiers: 'best\nfree\nfor beginners',
+      locations: 'usa\npakistan',
+    },
+    'seo-content-outline-generator': {
+      topic: 'Technical SEO',
+      primaryKeyword: 'technical seo checklist',
+      audience: 'Small business owners',
+    },
+    'image-alt-text-helper': {
+      subject: 'Laptop showing website analytics dashboard',
+      context: 'Blog hero image for an SEO strategy article',
+      count: '5',
+    },
+    'internal-link-opportunities': {
+      targetKeywords: 'technical seo\nsite audit\ncore web vitals',
+      existingPages: 'https://example.com/blog/on-page-seo|On-Page SEO Guide\nhttps://example.com/blog/core-web-vitals|Core Web Vitals Basics\nhttps://example.com/blog/seo-audit|SEO Audit Template',
+    },
+    'on-page-seo-checklist': {
+      pageType: 'Blog Post',
+      goal: 'Rank higher for informational queries and improve CTR',
+    },
   };
 
   return forms[slug] ?? {};
@@ -226,6 +405,177 @@ function getFields(slug: string): FieldConfig[] {
     ],
     'json-formatter': [{ key: 'json', label: 'JSON', placeholder: 'Paste JSON here', multiline: true }],
     'md5-generator': [{ key: 'text', label: 'Text', placeholder: 'Enter text to hash', multiline: true }],
+    'title-tag-preview': [
+      { key: 'title', label: 'Title Tag', placeholder: 'Technical SEO Checklist for Startups' },
+      { key: 'url', label: 'URL', placeholder: 'https://example.com/blog/post', keyboardType: 'url' },
+    ],
+    'meta-description-checker': [
+      { key: 'description', label: 'Meta Description', placeholder: 'Enter meta description', multiline: true },
+    ],
+    'open-graph-generator': [
+      { key: 'title', label: 'Title', placeholder: 'Page title' },
+      { key: 'description', label: 'Description', placeholder: 'OG description', multiline: true },
+      { key: 'url', label: 'URL', placeholder: 'https://example.com', keyboardType: 'url' },
+      { key: 'image', label: 'Image URL', placeholder: 'https://example.com/image.jpg', keyboardType: 'url' },
+      { key: 'type', label: 'Type', placeholder: 'website or article' },
+    ],
+    'twitter-card-generator': [
+      { key: 'title', label: 'Title', placeholder: 'Page title' },
+      { key: 'description', label: 'Description', placeholder: 'Twitter description', multiline: true },
+      { key: 'url', label: 'URL', placeholder: 'https://example.com', keyboardType: 'url' },
+      { key: 'image', label: 'Image URL', placeholder: 'https://example.com/image.jpg', keyboardType: 'url' },
+      { key: 'card', label: 'Card Type', placeholder: 'summary_large_image' },
+    ],
+    'canonical-url-checker': [
+      { key: 'pageUrl', label: 'Page URL', placeholder: 'https://example.com/page?ref=abc', keyboardType: 'url' },
+      { key: 'canonicalUrl', label: 'Canonical URL', placeholder: 'https://example.com/page', keyboardType: 'url' },
+    ],
+    'hreflang-generator': [
+      { key: 'mappings', label: 'Mappings (lang|url)', placeholder: 'en|https://example.com/en/page', multiline: true },
+      { key: 'xDefault', label: 'x-default URL', placeholder: 'https://example.com/page', keyboardType: 'url' },
+    ],
+    'hreflang-validator': [
+      { key: 'mappings', label: 'Mappings (lang|url)', placeholder: 'en|https://example.com/en/page', multiline: true },
+    ],
+    'redirect-checker': [{ key: 'url', label: 'URL', placeholder: 'https://example.com', keyboardType: 'url' }],
+    'http-header-checker': [{ key: 'url', label: 'URL', placeholder: 'https://example.com', keyboardType: 'url' }],
+    'meta-robots-checker': [{ key: 'url', label: 'URL', placeholder: 'https://example.com', keyboardType: 'url' }],
+    'x-robots-tag-checker': [{ key: 'url', label: 'URL', placeholder: 'https://example.com', keyboardType: 'url' }],
+    'sitemap-validator': [{ key: 'sitemap', label: 'Sitemap XML', placeholder: 'Paste sitemap XML', multiline: true }],
+    'sitemap-url-extractor': [{ key: 'sitemap', label: 'Sitemap XML', placeholder: 'Paste sitemap XML', multiline: true }],
+    'robots-tester': [
+      { key: 'robotsTxt', label: 'Robots.txt', placeholder: 'User-agent: *\nDisallow: /admin', multiline: true },
+      { key: 'testUrl', label: 'Test URL', placeholder: 'https://example.com/admin', keyboardType: 'url' },
+    ],
+    'serp-snippet-optimizer': [
+      { key: 'title', label: 'Title', placeholder: 'Title tag' },
+      { key: 'description', label: 'Description', placeholder: 'Meta description', multiline: true },
+      { key: 'url', label: 'URL', placeholder: 'https://example.com/page', keyboardType: 'url' },
+    ],
+    'keyword-suggestion-generator': [
+      { key: 'keyword', label: 'Seed Keyword', placeholder: 'technical seo' },
+      { key: 'count', label: 'Suggestions Count', placeholder: '10', keyboardType: 'numeric' },
+    ],
+    'long-tail-keyword-finder': [
+      { key: 'keyword', label: 'Seed Keyword', placeholder: 'technical seo' },
+      { key: 'count', label: 'Suggestions Count', placeholder: '12', keyboardType: 'numeric' },
+    ],
+    'keyword-difficulty-estimator': [
+      { key: 'keyword', label: 'Keyword', placeholder: 'technical seo checklist' },
+      { key: 'domainAuthority', label: 'Domain Authority (0-100)', placeholder: '45', keyboardType: 'numeric' },
+    ],
+    'search-intent-classifier': [
+      { key: 'keyword', label: 'Keyword', placeholder: 'best technical seo tools' },
+    ],
+    'faq-schema-generator': [
+      { key: 'faqPairs', label: 'FAQ Pairs (Question|Answer)', placeholder: 'What is SEO?|SEO is...', multiline: true },
+    ],
+    'product-schema-generator': [
+      { key: 'name', label: 'Product Name', placeholder: 'SEO Audit Template' },
+      { key: 'description', label: 'Description', placeholder: 'Product description', multiline: true },
+      { key: 'brand', label: 'Brand', placeholder: 'OptiSEO' },
+      { key: 'sku', label: 'SKU', placeholder: 'SEO-AUDIT-001' },
+      { key: 'price', label: 'Price', placeholder: '29', keyboardType: 'numeric' },
+      { key: 'currency', label: 'Currency', placeholder: 'USD' },
+      { key: 'availability', label: 'Availability URL', placeholder: 'https://schema.org/InStock', keyboardType: 'url' },
+      { key: 'url', label: 'Product URL', placeholder: 'https://example.com/product', keyboardType: 'url' },
+    ],
+    'article-schema-generator': [
+      { key: 'headline', label: 'Headline', placeholder: 'Technical SEO Checklist for Startups' },
+      { key: 'description', label: 'Description', placeholder: 'Article description', multiline: true },
+      { key: 'author', label: 'Author', placeholder: 'OptiSEO Team' },
+      { key: 'publishedDate', label: 'Published Date', placeholder: '2026-01-10' },
+      { key: 'url', label: 'Article URL', placeholder: 'https://example.com/blog/post', keyboardType: 'url' },
+    ],
+    'local-business-schema-generator': [
+      { key: 'name', label: 'Business Name', placeholder: 'OptiSEO Agency' },
+      { key: 'phone', label: 'Phone', placeholder: '+1-555-123-4567' },
+      { key: 'address', label: 'Address', placeholder: '123 Market St' },
+      { key: 'city', label: 'City', placeholder: 'San Francisco' },
+      { key: 'country', label: 'Country Code', placeholder: 'US' },
+      { key: 'website', label: 'Website', placeholder: 'https://example.com', keyboardType: 'url' },
+    ],
+    'breadcrumb-schema-generator': [
+      { key: 'items', label: 'Items (name|url)', placeholder: 'Home|https://example.com', multiline: true },
+    ],
+    'internal-link-suggestor': [
+      { key: 'targetKeywords', label: 'Target Keywords', placeholder: 'technical seo\nsite audit', multiline: true },
+      { key: 'existingPages', label: 'Existing Pages (url|title)', placeholder: 'https://example.com/page|Title', multiline: true },
+    ],
+    'anchor-text-analyzer': [
+      { key: 'anchors', label: 'Anchor Texts', placeholder: 'click here\ntechnical seo checklist', multiline: true },
+      { key: 'targetKeyword', label: 'Target Keyword (optional)', placeholder: 'technical seo checklist' },
+    ],
+    'page-speed-hint-checker': [
+      { key: 'lcp', label: 'LCP (seconds)', placeholder: '3.2', keyboardType: 'numeric' },
+      { key: 'cls', label: 'CLS', placeholder: '0.18', keyboardType: 'numeric' },
+      { key: 'inp', label: 'INP (ms)', placeholder: '280', keyboardType: 'numeric' },
+      { key: 'imageWeightKb', label: 'Total Image Weight (KB)', placeholder: '1800', keyboardType: 'numeric' },
+      { key: 'jsWeightKb', label: 'Total JS Weight (KB)', placeholder: '900', keyboardType: 'numeric' },
+    ],
+    'core-web-vitals-estimator': [
+      { key: 'lcp', label: 'LCP (seconds)', placeholder: '2.8', keyboardType: 'numeric' },
+      { key: 'cls', label: 'CLS', placeholder: '0.12', keyboardType: 'numeric' },
+      { key: 'inp', label: 'INP (ms)', placeholder: '260', keyboardType: 'numeric' },
+    ],
+    'mobile-friendly-checklist': [
+      { key: 'viewport', label: 'Viewport Meta (yes/no)', placeholder: 'yes' },
+      { key: 'responsive', label: 'Responsive Layout (yes/no)', placeholder: 'yes' },
+      { key: 'tapTargets', label: 'Tap Targets Adequate (yes/no)', placeholder: 'yes' },
+      { key: 'fontSize', label: 'Base Font Size (px)', placeholder: '16', keyboardType: 'numeric' },
+    ],
+    'ssl-https-checker': [
+      { key: 'url', label: 'URL', placeholder: 'https://example.com', keyboardType: 'url' },
+    ],
+    'seo-title-idea-generator': [
+      { key: 'topic', label: 'Topic', placeholder: 'Technical SEO Checklist' },
+      { key: 'keyword', label: 'Primary Keyword', placeholder: 'technical seo checklist' },
+      { key: 'brand', label: 'Brand', placeholder: 'OptiSEO' },
+      { key: 'count', label: 'Number of Ideas', placeholder: '5', keyboardType: 'numeric' },
+    ],
+    'meta-description-idea-generator': [
+      { key: 'topic', label: 'Topic', placeholder: 'Technical SEO Checklist' },
+      { key: 'keyword', label: 'Primary Keyword', placeholder: 'technical seo checklist' },
+      { key: 'cta', label: 'CTA', placeholder: 'Read the full checklist now.' },
+      { key: 'count', label: 'Number of Ideas', placeholder: '5', keyboardType: 'numeric' },
+    ],
+    'seo-slug-generator': [
+      { key: 'title', label: 'Page Title', placeholder: 'Technical SEO Checklist for Startups' },
+    ],
+    'keyword-clusterer': [
+      { key: 'keywords', label: 'Keywords (comma/new line)', placeholder: 'keyword 1\nkeyword 2', multiline: true },
+    ],
+    'keyword-intent-breakdown': [
+      { key: 'keywords', label: 'Keywords (comma/new line)', placeholder: 'what is seo\nbest seo tools', multiline: true },
+    ],
+    'semantic-keyword-expander': [
+      { key: 'seedKeyword', label: 'Seed Keyword', placeholder: 'technical seo' },
+      { key: 'modifiers', label: 'Modifiers', placeholder: 'best\nfree\nfor beginners', multiline: true },
+      { key: 'locations', label: 'Locations (optional)', placeholder: 'usa\npakistan', multiline: true },
+    ],
+    'seo-content-outline-generator': [
+      { key: 'topic', label: 'Topic', placeholder: 'Technical SEO' },
+      { key: 'primaryKeyword', label: 'Primary Keyword', placeholder: 'technical seo checklist' },
+      { key: 'audience', label: 'Audience', placeholder: 'Small business owners' },
+    ],
+    'image-alt-text-helper': [
+      { key: 'subject', label: 'Image Subject', placeholder: 'Laptop showing website analytics dashboard' },
+      { key: 'context', label: 'Context', placeholder: 'Blog hero image for an SEO strategy article', multiline: true },
+      { key: 'count', label: 'Number of Suggestions', placeholder: '5', keyboardType: 'numeric' },
+    ],
+    'internal-link-opportunities': [
+      { key: 'targetKeywords', label: 'Target Keywords', placeholder: 'technical seo\nsite audit', multiline: true },
+      {
+        key: 'existingPages',
+        label: 'Existing Pages (url|title per line)',
+        placeholder: 'https://example.com/blog/seo-audit|SEO Audit Template',
+        multiline: true,
+      },
+    ],
+    'on-page-seo-checklist': [
+      { key: 'pageType', label: 'Page Type', placeholder: 'Blog Post' },
+      { key: 'goal', label: 'Primary Goal', placeholder: 'Rank for informational queries and improve CTR', multiline: true },
+    ],
   };
 
   return fieldMap[slug] ?? [];
@@ -320,6 +670,56 @@ function getBaseFileName(fileName?: string | null) {
   const withoutExtension = normalized.replace(/\.[^.]+$/, '');
 
   return withoutExtension || 'image';
+}
+
+function parseList(value: string) {
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parsePipeRows(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [left, right] = line.split('|').map((item) => item.trim());
+      return { left: left ?? '', right: right ?? '' };
+    });
+}
+
+function getNumeric(value: string, fallback: number) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+  return parsed;
+}
+
+function clip(value: string, maxLength: number) {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  return `${value.slice(0, Math.max(1, maxLength - 3)).trimEnd()}...`;
+}
+
+function classifySearchIntent(keyword: string) {
+  const value = keyword.toLowerCase();
+  if (/\b(near me|in [a-z]{2,}|city|local|open now)\b/.test(value)) {
+    return 'Local';
+  }
+  if (/\b(buy|price|cost|quote|hire|service|agency|order)\b/.test(value)) {
+    return 'Transactional';
+  }
+  if (/\b(best|top|review|compare|vs|alternative|software|tool)\b/.test(value)) {
+    return 'Commercial';
+  }
+  if (/\b(login|sign in|official|homepage|contact)\b/.test(value)) {
+    return 'Navigational';
+  }
+  return 'Informational';
 }
 
 export default function ToolDetailScreen() {
@@ -817,6 +1217,705 @@ export default function ToolDetailScreen() {
         case 'json-formatter':
           output = formatJson(form.json);
           break;
+        case 'title-tag-preview': {
+          const title = (form.title ?? '').trim();
+          const url = (form.url ?? 'https://example.com').trim();
+          const length = title.length;
+          const status = length >= 40 && length <= 60
+            ? 'Ideal'
+            : length < 40
+              ? 'Too short'
+              : 'Too long';
+          output = [
+            `Title Length: ${length}`,
+            `Status: ${status}`,
+            `Preview URL: ${normalizeUrl(url).replace(/^https?:\/\//, '')}`,
+            '',
+            'Desktop Preview:',
+            clip(title || 'Untitled Page', 60),
+          ].join('\n');
+          break;
+        }
+        case 'meta-description-checker': {
+          const description = (form.description ?? '').trim();
+          const length = description.length;
+          const words = countWords(description).words;
+          const status = length >= 140 && length <= 160
+            ? 'Ideal'
+            : length < 140
+              ? 'Too short'
+              : 'Too long';
+          output = [
+            `Length: ${length} characters`,
+            `Words: ${words}`,
+            `Status: ${status}`,
+            '',
+            'Suggestion:',
+            status === 'Ideal'
+              ? '- Description length is optimized.'
+              : status === 'Too short'
+                ? '- Add more context and a CTA to reach 140-160 chars.'
+                : '- Trim extra words and keep key value proposition first.',
+          ].join('\n');
+          break;
+        }
+        case 'open-graph-generator': {
+          const title = form.title ?? '';
+          const description = form.description ?? '';
+          const url = normalizeUrl(form.url ?? 'https://example.com');
+          const image = form.image ?? '';
+          const type = (form.type ?? 'website').trim() || 'website';
+          output = [
+            `<meta property="og:title" content="${title}" />`,
+            `<meta property="og:description" content="${description}" />`,
+            `<meta property="og:type" content="${type}" />`,
+            `<meta property="og:url" content="${url}" />`,
+            `<meta property="og:image" content="${image}" />`,
+          ].join('\n');
+          break;
+        }
+        case 'twitter-card-generator': {
+          const title = form.title ?? '';
+          const description = form.description ?? '';
+          const image = form.image ?? '';
+          const card = (form.card ?? 'summary_large_image').trim() || 'summary_large_image';
+          output = [
+            `<meta name="twitter:card" content="${card}" />`,
+            `<meta name="twitter:title" content="${title}" />`,
+            `<meta name="twitter:description" content="${description}" />`,
+            `<meta name="twitter:image" content="${image}" />`,
+          ].join('\n');
+          break;
+        }
+        case 'canonical-url-checker': {
+          const pageUrl = normalizeUrl(form.pageUrl ?? 'https://example.com');
+          const canonicalUrl = normalizeUrl(form.canonicalUrl ?? pageUrl);
+          const page = new URL(pageUrl);
+          const canonical = new URL(canonicalUrl);
+          const isSamePath = `${page.origin}${page.pathname}` === `${canonical.origin}${canonical.pathname}`;
+          output = [
+            `Page URL: ${pageUrl}`,
+            `Canonical URL: ${canonicalUrl}`,
+            `Match Status: ${isSamePath ? 'Valid canonical target' : 'Canonical points to different path'}`,
+            '',
+            'Recommendation:',
+            isSamePath
+              ? '- Canonical setup looks consistent.'
+              : '- If this is not an intentional canonicalization, align canonical with the primary page URL.',
+          ].join('\n');
+          break;
+        }
+        case 'hreflang-generator': {
+          const rows = parsePipeRows(form.mappings ?? '');
+          const tags = rows
+            .filter((row) => row.left && row.right)
+            .map((row) => `<link rel="alternate" hreflang="${row.left}" href="${row.right}" />`);
+          if (form.xDefault?.trim()) {
+            tags.push(`<link rel="alternate" hreflang="x-default" href="${form.xDefault.trim()}" />`);
+          }
+          output = tags.length ? tags.join('\n') : 'Add mappings in format: lang|url';
+          break;
+        }
+        case 'hreflang-validator': {
+          const rows = parsePipeRows(form.mappings ?? '').filter((row) => row.left || row.right);
+          const issues: string[] = [];
+          const seenLangs = new Set<string>();
+          rows.forEach((row, index) => {
+            const lang = row.left.toLowerCase();
+            if (!row.left || !row.right) {
+              issues.push(`Row ${index + 1}: Missing language or URL.`);
+              return;
+            }
+            if (!/^[a-z]{2}(-[a-z]{2})?$/i.test(lang)) {
+              issues.push(`Row ${index + 1}: Invalid language code "${row.left}".`);
+            }
+            if (seenLangs.has(lang)) {
+              issues.push(`Row ${index + 1}: Duplicate language code "${row.left}".`);
+            }
+            seenLangs.add(lang);
+            try {
+              normalizeUrl(row.right);
+            } catch {
+              issues.push(`Row ${index + 1}: Invalid URL "${row.right}".`);
+            }
+          });
+          output = [
+            `Rows Checked: ${rows.length}`,
+            `Valid: ${issues.length === 0 ? 'Yes' : 'No'}`,
+            '',
+            'Issues:',
+            ...(issues.length ? issues.map((item) => `- ${item}`) : ['- None']),
+          ].join('\n');
+          break;
+        }
+        case 'redirect-checker': {
+          const requestedUrl = normalizeUrl(form.url ?? 'https://example.com');
+          const response = await fetch(requestedUrl);
+          const finalUrl = response.url;
+          const redirected = finalUrl !== requestedUrl;
+          output = [
+            `Requested URL: ${requestedUrl}`,
+            `Final URL: ${finalUrl}`,
+            `Status Code: ${response.status}`,
+            `Redirected: ${redirected ? 'Yes' : 'No'}`,
+          ].join('\n');
+          break;
+        }
+        case 'http-header-checker': {
+          const targetUrl = normalizeUrl(form.url ?? 'https://example.com');
+          const response = await fetch(targetUrl);
+          const importantHeaders = ['content-type', 'cache-control', 'x-robots-tag', 'strict-transport-security', 'server'];
+          const headerLines = importantHeaders.map((header) => `- ${header}: ${response.headers.get(header) ?? 'Not found'}`);
+          output = [
+            `URL: ${response.url}`,
+            `Status Code: ${response.status}`,
+            '',
+            'Important Headers:',
+            ...headerLines,
+          ].join('\n');
+          break;
+        }
+        case 'meta-robots-checker': {
+          const report = await analyzeWebsite(form.url ?? 'https://example.com');
+          const robots = (report.robots ?? '').toLowerCase();
+          const indexStatus = robots.includes('noindex') ? 'Noindex detected' : 'Index allowed';
+          const followStatus = robots.includes('nofollow') ? 'Nofollow detected' : 'Follow allowed';
+          output = [
+            `URL: ${report.finalUrl}`,
+            `Meta Robots: ${report.robots}`,
+            `Index Status: ${indexStatus}`,
+            `Follow Status: ${followStatus}`,
+          ].join('\n');
+          break;
+        }
+        case 'x-robots-tag-checker': {
+          const targetUrl = normalizeUrl(form.url ?? 'https://example.com');
+          const response = await fetch(targetUrl);
+          const xRobotsTag = response.headers.get('x-robots-tag');
+          output = [
+            `URL: ${response.url}`,
+            `Status Code: ${response.status}`,
+            `X-Robots-Tag: ${xRobotsTag ?? 'Not present'}`,
+          ].join('\n');
+          break;
+        }
+        case 'sitemap-validator': {
+          const xml = (form.sitemap ?? '').trim();
+          const issues: string[] = [];
+          const hasDeclaration = xml.startsWith('<?xml');
+          const hasUrlSet = /<urlset[\s>]/i.test(xml);
+          const urls = [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => (match[1] ?? '').trim());
+          if (!hasDeclaration) {
+            issues.push('Missing XML declaration.');
+          }
+          if (!hasUrlSet) {
+            issues.push('Missing <urlset> root node.');
+          }
+          if (!urls.length) {
+            issues.push('No <loc> URLs found.');
+          }
+          output = [
+            `XML Declaration: ${hasDeclaration ? 'Present' : 'Missing'}`,
+            `urlset Node: ${hasUrlSet ? 'Present' : 'Missing'}`,
+            `URLs Found: ${urls.length}`,
+            '',
+            'Issues:',
+            ...(issues.length ? issues.map((item) => `- ${item}`) : ['- None']),
+          ].join('\n');
+          break;
+        }
+        case 'sitemap-url-extractor': {
+          const xml = form.sitemap ?? '';
+          const urls = [...xml.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) => (match[1] ?? '').trim()).filter(Boolean);
+          output = [
+            `Total URLs: ${urls.length}`,
+            '',
+            'URLs:',
+            ...(urls.length ? urls.map((url) => `- ${url}`) : ['- None found']),
+          ].join('\n');
+          break;
+        }
+        case 'robots-tester': {
+          const rules = parseList(form.robotsTxt ?? '');
+          const url = new URL(normalizeUrl(form.testUrl ?? 'https://example.com'));
+          const path = url.pathname || '/';
+          const disallowRules = rules.filter((line) => /^disallow:/i.test(line)).map((line) => line.replace(/^disallow:\s*/i, '').trim());
+          const allowRules = rules.filter((line) => /^allow:/i.test(line)).map((line) => line.replace(/^allow:\s*/i, '').trim());
+          const blockedBy = disallowRules.find((rule) => rule && path.startsWith(rule));
+          const allowedBy = allowRules.find((rule) => rule && path.startsWith(rule));
+          const blocked = Boolean(blockedBy) && !allowedBy;
+          output = [
+            `Test URL: ${url.toString()}`,
+            `Path: ${path}`,
+            `Blocked: ${blocked ? 'Yes' : 'No'}`,
+            `Matched Disallow: ${blockedBy ?? 'None'}`,
+            `Matched Allow: ${allowedBy ?? 'None'}`,
+          ].join('\n');
+          break;
+        }
+        case 'serp-snippet-optimizer': {
+          const title = (form.title ?? '').trim();
+          const description = (form.description ?? '').trim();
+          const url = normalizeUrl(form.url ?? 'https://example.com').replace(/^https?:\/\//, '');
+          const titleStatus = title.length >= 40 && title.length <= 60 ? 'Ideal' : title.length < 40 ? 'Too short' : 'Too long';
+          const descStatus = description.length >= 140 && description.length <= 160 ? 'Ideal' : description.length < 140 ? 'Too short' : 'Too long';
+          output = [
+            `Title Length: ${title.length} (${titleStatus})`,
+            `Description Length: ${description.length} (${descStatus})`,
+            '',
+            'SERP Preview:',
+            clip(title, 60),
+            url,
+            clip(description, 160),
+          ].join('\n');
+          break;
+        }
+        case 'keyword-suggestion-generator': {
+          const keyword = (form.keyword ?? '').trim() || 'seo';
+          const count = Math.max(1, Math.min(25, Math.round(getNumeric(form.count ?? '10', 10))));
+          const modifiers = ['best', 'tools', 'guide', 'checklist', 'tips', 'strategy', 'template', 'services', 'examples', 'for beginners'];
+          const suggestions = Array.from({ length: count }).map((_, index) => `${keyword} ${modifiers[index % modifiers.length]}`);
+          output = [
+            `Seed Keyword: ${keyword}`,
+            `Suggestions: ${suggestions.length}`,
+            '',
+            'Keywords:',
+            ...suggestions.map((item) => `- ${item}`),
+          ].join('\n');
+          break;
+        }
+        case 'long-tail-keyword-finder': {
+          const keyword = (form.keyword ?? '').trim() || 'seo';
+          const count = Math.max(1, Math.min(25, Math.round(getNumeric(form.count ?? '12', 12))));
+          const patterns = [
+            `how to ${keyword} for small business`,
+            `${keyword} checklist for beginners`,
+            `best ${keyword} strategy in 2026`,
+            `${keyword} mistakes to avoid`,
+            `${keyword} tools for startups`,
+            `${keyword} step by step guide`,
+          ];
+          const suggestions = Array.from({ length: count }).map((_, index) => patterns[index % patterns.length]);
+          output = [
+            `Seed Keyword: ${keyword}`,
+            `Long-tail Suggestions: ${suggestions.length}`,
+            '',
+            'Long-tail Keywords:',
+            ...suggestions.map((item) => `- ${item}`),
+          ].join('\n');
+          break;
+        }
+        case 'keyword-difficulty-estimator': {
+          const keyword = (form.keyword ?? '').trim() || 'seo keyword';
+          const terms = keyword.split(/\s+/).filter(Boolean).length;
+          const domainAuthority = Math.max(0, Math.min(100, getNumeric(form.domainAuthority ?? '45', 45)));
+          let difficulty = 30 + (terms * 8) + (/\b(best|top|services|agency|buy)\b/i.test(keyword) ? 12 : 0);
+          difficulty += Math.max(0, Math.round((60 - domainAuthority) / 2));
+          difficulty = Math.max(1, Math.min(100, difficulty));
+          const label = difficulty >= 70 ? 'High' : difficulty >= 45 ? 'Medium' : 'Low';
+          output = [
+            `Keyword: ${keyword}`,
+            `Estimated Difficulty: ${difficulty}/100`,
+            `Difficulty Level: ${label}`,
+            `Domain Authority Used: ${domainAuthority}`,
+          ].join('\n');
+          break;
+        }
+        case 'search-intent-classifier': {
+          const keyword = (form.keyword ?? '').trim() || 'seo';
+          const intent = classifySearchIntent(keyword);
+          output = [
+            `Keyword: ${keyword}`,
+            `Predicted Intent: ${intent}`,
+          ].join('\n');
+          break;
+        }
+        case 'faq-schema-generator': {
+          const pairs = parsePipeRows(form.faqPairs ?? '').filter((row) => row.left && row.right);
+          const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: pairs.map((pair) => ({
+              '@type': 'Question',
+              name: pair.left,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: pair.right,
+              },
+            })),
+          };
+          output = JSON.stringify(schema, null, 2);
+          break;
+        }
+        case 'product-schema-generator': {
+          const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: form.name ?? '',
+            description: form.description ?? '',
+            brand: {
+              '@type': 'Brand',
+              name: form.brand ?? '',
+            },
+            sku: form.sku ?? '',
+            offers: {
+              '@type': 'Offer',
+              url: form.url ?? '',
+              priceCurrency: form.currency ?? 'USD',
+              price: form.price ?? '',
+              availability: form.availability ?? 'https://schema.org/InStock',
+            },
+          };
+          output = JSON.stringify(schema, null, 2);
+          break;
+        }
+        case 'article-schema-generator': {
+          const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: form.headline ?? '',
+            description: form.description ?? '',
+            author: {
+              '@type': 'Person',
+              name: form.author ?? '',
+            },
+            datePublished: form.publishedDate ?? '',
+            mainEntityOfPage: form.url ?? '',
+          };
+          output = JSON.stringify(schema, null, 2);
+          break;
+        }
+        case 'local-business-schema-generator': {
+          const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            name: form.name ?? '',
+            telephone: form.phone ?? '',
+            url: form.website ?? '',
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: form.address ?? '',
+              addressLocality: form.city ?? '',
+              addressCountry: form.country ?? '',
+            },
+          };
+          output = JSON.stringify(schema, null, 2);
+          break;
+        }
+        case 'breadcrumb-schema-generator': {
+          const rows = parsePipeRows(form.items ?? '').filter((row) => row.left && row.right);
+          const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: rows.map((row, index) => ({
+              '@type': 'ListItem',
+              position: index + 1,
+              name: row.left,
+              item: row.right,
+            })),
+          };
+          output = JSON.stringify(schema, null, 2);
+          break;
+        }
+        case 'internal-link-suggestor': {
+          const report = findInternalLinkOpportunities({
+            targetKeywords: form.targetKeywords ?? '',
+            existingPages: form.existingPages ?? '',
+          });
+          output = [
+            `Target Keywords with Matches: ${report.opportunities.length}`,
+            `Unmatched Keywords: ${report.unmatchedKeywords.length}`,
+            '',
+            'Suggestions:',
+            ...(
+              report.opportunities.length
+                ? report.opportunities.flatMap((item) => [
+                  `- ${item.keyword}`,
+                  ...item.matches.map((match) => `  - ${match.title} -> ${match.url}`),
+                ])
+                : ['- No match found']
+            ),
+          ].join('\n');
+          break;
+        }
+        case 'anchor-text-analyzer': {
+          const anchors = parseList(form.anchors ?? '');
+          const genericTerms = new Set(['click here', 'read more', 'learn more', 'here', 'this link']);
+          const targetKeyword = (form.targetKeyword ?? '').trim().toLowerCase();
+          let exactMatch = 0;
+          let generic = 0;
+          anchors.forEach((anchor) => {
+            const normalized = anchor.toLowerCase().trim();
+            if (targetKeyword && normalized === targetKeyword) {
+              exactMatch += 1;
+            }
+            if (genericTerms.has(normalized)) {
+              generic += 1;
+            }
+          });
+          output = [
+            `Total Anchors: ${anchors.length}`,
+            `Exact Match Anchors: ${exactMatch}`,
+            `Generic Anchors: ${generic}`,
+            '',
+            'Recommendation:',
+            generic > 0
+              ? '- Reduce generic anchors and use descriptive context-based anchors.'
+              : '- Anchor mix looks healthy.',
+          ].join('\n');
+          break;
+        }
+        case 'page-speed-hint-checker': {
+          const lcp = getNumeric(form.lcp ?? '0', 0);
+          const cls = getNumeric(form.cls ?? '0', 0);
+          const inp = getNumeric(form.inp ?? '0', 0);
+          const imageWeightKb = getNumeric(form.imageWeightKb ?? '0', 0);
+          const jsWeightKb = getNumeric(form.jsWeightKb ?? '0', 0);
+          const hints = [
+            lcp > 2.5 && '- Improve LCP by optimizing hero image delivery and server response time.',
+            cls > 0.1 && '- Reduce layout shift by reserving media dimensions and avoiding late UI injections.',
+            inp > 200 && '- Reduce INP by splitting long JavaScript tasks and deferring non-critical scripts.',
+            imageWeightKb > 1200 && '- Compress large images and adopt next-gen formats.',
+            jsWeightKb > 700 && '- Reduce JS bundle size and remove unused dependencies.',
+          ].filter(Boolean) as string[];
+          output = [
+            `LCP: ${lcp}s`,
+            `CLS: ${cls}`,
+            `INP: ${inp}ms`,
+            `Image Weight: ${imageWeightKb}KB`,
+            `JS Weight: ${jsWeightKb}KB`,
+            '',
+            'Optimization Hints:',
+            ...(hints.length ? hints : ['- Metrics look healthy.']),
+          ].join('\n');
+          break;
+        }
+        case 'core-web-vitals-estimator': {
+          const lcp = getNumeric(form.lcp ?? '0', 0);
+          const cls = getNumeric(form.cls ?? '0', 0);
+          const inp = getNumeric(form.inp ?? '0', 0);
+          const lcpPass = lcp > 0 && lcp <= 2.5;
+          const clsPass = cls >= 0 && cls <= 0.1;
+          const inpPass = inp > 0 && inp <= 200;
+          const passCount = [lcpPass, clsPass, inpPass].filter(Boolean).length;
+          const overall = passCount === 3 ? 'Good' : passCount === 2 ? 'Needs Improvement' : 'Poor';
+          output = [
+            `LCP: ${lcp}s (${lcpPass ? 'Pass' : 'Fail'})`,
+            `CLS: ${cls} (${clsPass ? 'Pass' : 'Fail'})`,
+            `INP: ${inp}ms (${inpPass ? 'Pass' : 'Fail'})`,
+            `Overall: ${overall}`,
+          ].join('\n');
+          break;
+        }
+        case 'mobile-friendly-checklist': {
+          const viewport = (form.viewport ?? '').trim().toLowerCase();
+          const responsive = (form.responsive ?? '').trim().toLowerCase();
+          const tapTargets = (form.tapTargets ?? '').trim().toLowerCase();
+          const fontSize = getNumeric(form.fontSize ?? '16', 16);
+          const checks = [
+            { label: 'Viewport Meta', pass: viewport === 'yes' },
+            { label: 'Responsive Layout', pass: responsive === 'yes' },
+            { label: 'Tap Target Spacing', pass: tapTargets === 'yes' },
+            { label: 'Readable Font Size', pass: fontSize >= 14 },
+          ];
+          const passed = checks.filter((check) => check.pass).length;
+          output = [
+            `Checks Passed: ${passed}/${checks.length}`,
+            '',
+            'Checklist:',
+            ...checks.map((check) => `- ${check.label}: ${check.pass ? 'Pass' : 'Fail'}`),
+          ].join('\n');
+          break;
+        }
+        case 'ssl-https-checker': {
+          const requestedUrl = normalizeUrl(form.url ?? 'https://example.com');
+          const response = await fetch(requestedUrl);
+          const finalUrl = response.url;
+          const httpsEnabled = finalUrl.startsWith('https://');
+          const hsts = response.headers.get('strict-transport-security');
+          output = [
+            `Requested URL: ${requestedUrl}`,
+            `Final URL: ${finalUrl}`,
+            `HTTPS Enabled: ${httpsEnabled ? 'Yes' : 'No'}`,
+            `HSTS Header: ${hsts ?? 'Not found'}`,
+          ].join('\n');
+          break;
+        }
+        case 'seo-title-idea-generator': {
+          const report = generateSeoTitleIdeas({
+            topic: form.topic ?? '',
+            keyword: form.keyword ?? '',
+            brand: form.brand ?? '',
+            count: form.count ?? '',
+          });
+          output = [
+            `Keyword: ${report.keyword}`,
+            `Total Ideas: ${report.titles.length}`,
+            '',
+            'Title Ideas:',
+            ...report.titles.map((row, index) => (
+              `${index + 1}. ${row.title} (${row.length} chars${row.withinLimit ? ', ideal length' : ''})`
+            )),
+          ].join('\n');
+          break;
+        }
+        case 'meta-description-idea-generator': {
+          const report = generateMetaDescriptionIdeas({
+            topic: form.topic ?? '',
+            keyword: form.keyword ?? '',
+            cta: form.cta ?? '',
+            count: form.count ?? '',
+          });
+          output = [
+            `Keyword: ${report.keyword}`,
+            `Total Ideas: ${report.descriptions.length}`,
+            '',
+            'Meta Description Ideas:',
+            ...report.descriptions.map((row, index) => (
+              `${index + 1}. ${row.description} (${row.length} chars${row.withinRange ? ', in range' : ''})`
+            )),
+          ].join('\n');
+          break;
+        }
+        case 'seo-slug-generator': {
+          const report = generateSeoSlug({ title: form.title ?? '' });
+          output = [
+            `Slug: ${report.slug}`,
+            `Length: ${report.length}`,
+            '',
+            'Notes:',
+            ...(report.warnings.length ? report.warnings.map((item) => `- ${item}`) : ['- Slug looks good.']),
+          ].join('\n');
+          break;
+        }
+        case 'keyword-clusterer': {
+          const report = clusterKeywords({ keywords: form.keywords ?? '' });
+          output = [
+            `Total Keywords: ${report.totalKeywords}`,
+            `Clusters: ${report.clusters.length}`,
+            '',
+            'Grouped Keywords:',
+            ...(
+              report.clusters.length
+                ? report.clusters.flatMap((cluster) => [
+                  `- ${cluster.label} (${cluster.keywords.length})`,
+                  ...cluster.keywords.map((keyword) => `  - ${keyword}`),
+                ])
+                : ['- No keywords found.']
+            ),
+          ].join('\n');
+          break;
+        }
+        case 'keyword-intent-breakdown': {
+          const report = buildKeywordIntentBreakdown({ keywords: form.keywords ?? '' });
+          output = [
+            `Total Keywords: ${report.rows.length}`,
+            `Informational: ${report.totals.Informational}`,
+            `Commercial: ${report.totals.Commercial}`,
+            `Transactional: ${report.totals.Transactional}`,
+            `Navigational: ${report.totals.Navigational}`,
+            `Local: ${report.totals.Local}`,
+            '',
+            'Keyword Intent:',
+            ...(report.rows.length ? report.rows.map((row) => `- ${row.keyword}: ${row.intent}`) : ['- No keywords found.']),
+          ].join('\n');
+          break;
+        }
+        case 'semantic-keyword-expander': {
+          const report = expandSemanticKeywords({
+            seedKeyword: form.seedKeyword ?? '',
+            modifiers: form.modifiers ?? '',
+            locations: form.locations ?? '',
+          });
+          output = [
+            `Seed Keyword: ${report.seedKeyword}`,
+            `Total Suggestions: ${report.suggestions.length}`,
+            '',
+            'Suggestions:',
+            ...report.suggestions.map((keyword) => `- ${keyword}`),
+          ].join('\n');
+          break;
+        }
+        case 'seo-content-outline-generator': {
+          const report = generateSeoContentOutline({
+            topic: form.topic ?? '',
+            primaryKeyword: form.primaryKeyword ?? '',
+            audience: form.audience ?? '',
+          });
+          output = [
+            `Suggested Title: ${report.title}`,
+            `Meta Description: ${report.metaDescription}`,
+            '',
+            'Outline:',
+            ...report.sections.flatMap((section) => [
+              `- ${section.heading}`,
+              ...section.points.map((point) => `  - ${point}`),
+            ]),
+            '',
+            'FAQ Ideas:',
+            ...report.faq.map((question) => `- ${question}`),
+          ].join('\n');
+          break;
+        }
+        case 'image-alt-text-helper': {
+          const report = generateAltTextSuggestions({
+            subject: form.subject ?? '',
+            context: form.context ?? '',
+            count: form.count ?? '',
+          });
+          output = [
+            `Suggestions: ${report.suggestions.length}`,
+            '',
+            'Alt Text Ideas:',
+            ...report.suggestions.map((item, index) => `${index + 1}. ${item.text} (${item.length} chars)`),
+          ].join('\n');
+          break;
+        }
+        case 'internal-link-opportunities': {
+          const report = findInternalLinkOpportunities({
+            targetKeywords: form.targetKeywords ?? '',
+            existingPages: form.existingPages ?? '',
+          });
+          output = [
+            `Target Keywords with Matches: ${report.opportunities.length}`,
+            `Unmatched Keywords: ${report.unmatchedKeywords.length}`,
+            `Ignored Page Lines: ${report.ignoredLines.length}`,
+            '',
+            'Internal Link Opportunities:',
+            ...(
+              report.opportunities.length
+                ? report.opportunities.flatMap((opportunity) => [
+                  `- ${opportunity.keyword} (anchor: ${opportunity.anchorText})`,
+                  ...opportunity.matches.map((match) => `  - ${match.title} -> ${match.url} [score: ${match.score}]`),
+                ])
+                : ['- No strong matches found.']
+            ),
+            '',
+            'Unmatched:',
+            ...(report.unmatchedKeywords.length ? report.unmatchedKeywords.map((item) => `- ${item}`) : ['- None']),
+            '',
+            'Ignored Lines:',
+            ...(report.ignoredLines.length ? report.ignoredLines.map((item) => `- ${item}`) : ['- None']),
+          ].join('\n');
+          break;
+        }
+        case 'on-page-seo-checklist': {
+          const report = generateOnPageSeoChecklist({
+            pageType: form.pageType ?? '',
+            goal: form.goal ?? '',
+          });
+          output = [
+            `Page Type: ${report.pageType}`,
+            `Goal: ${report.goal}`,
+            '',
+            'Checklist:',
+            ...report.sections.flatMap((section) => [
+              `- ${section.heading}`,
+              ...section.items.map((item) => `  - ${item}`),
+            ]),
+          ].join('\n');
+          break;
+        }
         case 'md5-generator':
           output = md5(form.text);
           break;
@@ -916,7 +2015,7 @@ export default function ToolDetailScreen() {
                           label: item.label,
                           uri: item.uri,
                           fileName: item.fileName ?? `${item.label}.png`,
-                          mimeType: item.mimeType,
+                          mimeType: item.mimeType ?? 'image/png',
                         })
                       }
                     >

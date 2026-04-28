@@ -680,6 +680,613 @@ export function buildUtmUrl(input: {
   return url.toString();
 }
 
+type TitleIdea = {
+  title: string;
+  length: number;
+  withinLimit: boolean;
+};
+
+type MetaDescriptionIdea = {
+  description: string;
+  length: number;
+  withinRange: boolean;
+};
+
+export type SeoTitleIdeasReport = {
+  keyword: string;
+  titles: TitleIdea[];
+};
+
+export type MetaDescriptionIdeasReport = {
+  keyword: string;
+  descriptions: MetaDescriptionIdea[];
+};
+
+export type SeoSlugReport = {
+  slug: string;
+  length: number;
+  warnings: string[];
+};
+
+export type KeywordCluster = {
+  label: string;
+  keywords: string[];
+};
+
+export type KeywordClusterReport = {
+  totalKeywords: number;
+  clusters: KeywordCluster[];
+};
+
+export type SearchIntent = 'Informational' | 'Commercial' | 'Transactional' | 'Navigational' | 'Local';
+
+export type IntentRow = {
+  keyword: string;
+  intent: SearchIntent;
+};
+
+export type KeywordIntentBreakdownReport = {
+  rows: IntentRow[];
+  totals: Record<SearchIntent, number>;
+};
+
+export type SemanticKeywordExpansionReport = {
+  seedKeyword: string;
+  suggestions: string[];
+};
+
+type ContentOutlineSection = {
+  heading: string;
+  points: string[];
+};
+
+export type SeoContentOutlineReport = {
+  title: string;
+  metaDescription: string;
+  sections: ContentOutlineSection[];
+  faq: string[];
+};
+
+export type AltTextSuggestion = {
+  text: string;
+  length: number;
+};
+
+export type AltTextSuggestionsReport = {
+  suggestions: AltTextSuggestion[];
+};
+
+type InternalLinkMatch = {
+  title: string;
+  url: string;
+  score: number;
+};
+
+type InternalLinkOpportunity = {
+  keyword: string;
+  anchorText: string;
+  matches: InternalLinkMatch[];
+};
+
+export type InternalLinkOpportunityReport = {
+  opportunities: InternalLinkOpportunity[];
+  unmatchedKeywords: string[];
+  ignoredLines: string[];
+};
+
+type ChecklistSection = {
+  heading: string;
+  items: string[];
+};
+
+export type OnPageSeoChecklistReport = {
+  pageType: string;
+  goal: string;
+  sections: ChecklistSection[];
+};
+
+const CLUSTER_STOP_WORDS = new Set([
+  'a', 'an', 'and', 'are', 'best', 'for', 'how', 'in', 'is', 'near', 'of', 'on', 'or', 'the', 'to', 'vs', 'what', 'with',
+]);
+
+function clampInteger(value: string, fallback: number, min: number, max: number) {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) {
+    return fallback;
+  }
+
+  return Math.max(min, Math.min(max, parsed));
+}
+
+function splitListInput(value: string) {
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function titleCase(value: string) {
+  return value
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function fitToMaxLength(value: string, maxLength: number) {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, Math.max(1, maxLength - 3)).trimEnd()}...`;
+}
+
+function normalizePhrase(value: string) {
+  const normalized = typeof value.normalize === 'function'
+    ? value.normalize('NFKD')
+    : value;
+
+  return normalized
+    .toLowerCase()
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokenize(value: string) {
+  return normalizePhrase(value)
+    .split(' ')
+    .filter(Boolean);
+}
+
+function getClusterLabel(keyword: string) {
+  const tokens = tokenize(keyword).filter((token) => !CLUSTER_STOP_WORDS.has(token));
+  const primary = tokens[0] ?? 'general';
+  const secondary = tokens[1];
+  return titleCase(secondary ? `${primary} ${secondary}` : primary);
+}
+
+function detectIntent(keyword: string): SearchIntent {
+  const value = keyword.toLowerCase();
+
+  if (/\b(near me|in [a-z]{2,}|city|local|open now)\b/i.test(value)) {
+    return 'Local';
+  }
+
+  if (/\b(buy|price|cost|quote|hire|service|agency|order)\b/i.test(value)) {
+    return 'Transactional';
+  }
+
+  if (/\b(best|top|review|compare|vs|alternative|software|tool)\b/i.test(value)) {
+    return 'Commercial';
+  }
+
+  if (/\b(login|sign in|official|homepage|contact)\b/i.test(value)) {
+    return 'Navigational';
+  }
+
+  return 'Informational';
+}
+
+function ensureMetaDescriptionLength(value: string) {
+  let output = value.trim();
+
+  if (output.length < 140) {
+    output = `${output} Get practical steps, examples, and implementation tips.`;
+  }
+
+  return fitToMaxLength(output, 160);
+}
+
+export function generateSeoTitleIdeas(input: {
+  topic: string;
+  keyword: string;
+  brand: string;
+  count: string;
+}): SeoTitleIdeasReport {
+  const keyword = input.keyword.trim() || input.topic.trim() || 'SEO strategy';
+  const topic = input.topic.trim() || keyword;
+  const brand = input.brand.trim();
+  const count = clampInteger(input.count, 5, 1, 12);
+  const templates = [
+    `${keyword}: Complete ${topic} Guide`,
+    `${topic} Checklist for Better Rankings`,
+    `How to Improve ${keyword} in 2026`,
+    `${keyword} Tips That Drive More Organic Traffic`,
+    `${topic} Framework for Faster SEO Wins`,
+    `${keyword} Best Practices for Growing Visibility`,
+  ];
+
+  const titles = Array.from({ length: count }).map((_, index) => {
+    const baseTitle = templates[index % templates.length];
+    const finalTitle = fitToMaxLength(
+      brand ? `${baseTitle} | ${brand}` : baseTitle,
+      60
+    );
+
+    return {
+      title: finalTitle,
+      length: finalTitle.length,
+      withinLimit: finalTitle.length >= 40 && finalTitle.length <= 60,
+    };
+  });
+
+  return { keyword, titles };
+}
+
+export function generateMetaDescriptionIdeas(input: {
+  topic: string;
+  keyword: string;
+  cta: string;
+  count: string;
+}): MetaDescriptionIdeasReport {
+  const keyword = input.keyword.trim() || input.topic.trim() || 'SEO';
+  const topic = input.topic.trim() || keyword;
+  const cta = input.cta.trim() || 'Start optimizing today.';
+  const count = clampInteger(input.count, 5, 1, 10);
+  const templates = [
+    `${topic} guide for teams targeting ${keyword}. Learn what to fix first, how to prioritize high-impact actions, and how to maintain momentum. ${cta}`,
+    `Need stronger rankings for ${keyword}? This ${topic.toLowerCase()} walkthrough shares quick wins, common mistakes, and practical improvements you can apply today. ${cta}`,
+    `Improve ${keyword} with a clear ${topic.toLowerCase()} process. Get actionable recommendations to raise visibility, clicks, and qualified traffic. ${cta}`,
+    `Build a smarter ${topic.toLowerCase()} plan around ${keyword}. Discover proven steps to strengthen pages, improve relevance, and compete effectively. ${cta}`,
+  ];
+
+  const descriptions = Array.from({ length: count }).map((_, index) => {
+    const text = ensureMetaDescriptionLength(templates[index % templates.length]);
+    return {
+      description: text,
+      length: text.length,
+      withinRange: text.length >= 140 && text.length <= 160,
+    };
+  });
+
+  return { keyword, descriptions };
+}
+
+export function generateSeoSlug(input: {
+  title?: string;
+}): SeoSlugReport {
+  const sourceTitle = input.title ?? '';
+  const normalizedTitle = typeof sourceTitle.normalize === 'function'
+    ? sourceTitle.normalize('NFKD')
+    : sourceTitle;
+
+  const clean = normalizedTitle
+    .toLowerCase()
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  let slug = clean || 'page';
+  if (slug.length > 80) {
+    slug = slug.slice(0, 80).replace(/-+[^-]*$/, '');
+  }
+
+  const warnings: string[] = [];
+  if (slug.length < 20) {
+    warnings.push('Slug is short. Consider adding specific context words.');
+  }
+  if (slug.length > 60) {
+    warnings.push('Slug is long. Aim for 20 to 60 characters when possible.');
+  }
+  if (slug.split('-').length < 3) {
+    warnings.push('Slug has very few terms. Add one or two descriptive terms.');
+  }
+
+  return {
+    slug,
+    length: slug.length,
+    warnings,
+  };
+}
+
+export function clusterKeywords(input: {
+  keywords: string;
+}): KeywordClusterReport {
+  const keywords = splitListInput(input.keywords);
+  const clusterMap = new Map<string, string[]>();
+
+  keywords.forEach((keyword) => {
+    const label = getClusterLabel(keyword);
+    const existing = clusterMap.get(label) ?? [];
+    existing.push(keyword);
+    clusterMap.set(label, existing);
+  });
+
+  const clusters = [...clusterMap.entries()]
+    .map(([label, entries]) => ({
+      label,
+      keywords: [...new Set(entries)],
+    }))
+    .sort((a, b) => b.keywords.length - a.keywords.length || a.label.localeCompare(b.label));
+
+  return {
+    totalKeywords: keywords.length,
+    clusters,
+  };
+}
+
+export function buildKeywordIntentBreakdown(input: {
+  keywords: string;
+}): KeywordIntentBreakdownReport {
+  const keywords = splitListInput(input.keywords);
+  const totals: Record<SearchIntent, number> = {
+    Informational: 0,
+    Commercial: 0,
+    Transactional: 0,
+    Navigational: 0,
+    Local: 0,
+  };
+
+  const rows = keywords.map((keyword) => {
+    const intent = detectIntent(keyword);
+    totals[intent] += 1;
+
+    return {
+      keyword,
+      intent,
+    };
+  });
+
+  return {
+    rows,
+    totals,
+  };
+}
+
+export function expandSemanticKeywords(input: {
+  seedKeyword: string;
+  modifiers: string;
+  locations: string;
+}): SemanticKeywordExpansionReport {
+  const seedKeyword = input.seedKeyword.trim();
+  if (!seedKeyword) {
+    throw new Error('Please provide a seed keyword.');
+  }
+
+  const modifiers = splitListInput(input.modifiers);
+  const locations = splitListInput(input.locations);
+  const suggestions = new Set<string>([seedKeyword]);
+
+  modifiers.forEach((modifier) => {
+    suggestions.add(`${modifier} ${seedKeyword}`);
+    suggestions.add(`${seedKeyword} ${modifier}`);
+  });
+
+  locations.forEach((location) => {
+    suggestions.add(`${seedKeyword} in ${location}`);
+  });
+
+  modifiers.forEach((modifier) => {
+    locations.forEach((location) => {
+      suggestions.add(`${modifier} ${seedKeyword} in ${location}`);
+    });
+  });
+
+  return {
+    seedKeyword,
+    suggestions: [...suggestions].slice(0, 60),
+  };
+}
+
+export function generateSeoContentOutline(input: {
+  topic: string;
+  primaryKeyword: string;
+  audience: string;
+}): SeoContentOutlineReport {
+  const topic = input.topic.trim() || 'SEO topic';
+  const primaryKeyword = input.primaryKeyword.trim() || topic;
+  const audience = input.audience.trim() || 'website owners';
+  const title = fitToMaxLength(`${primaryKeyword}: Complete ${topic} Guide`, 60);
+  const metaDescription = ensureMetaDescriptionLength(
+    `${topic} guide for ${audience} focused on ${primaryKeyword}. Learn what to prioritize, how to execute improvements, and how to track results.`
+  );
+  const sections: ContentOutlineSection[] = [
+    {
+      heading: `What Is ${topic} and Why It Matters`,
+      points: [
+        `Define ${topic} in plain language for ${audience}.`,
+        `Explain how ${primaryKeyword} impacts rankings and clicks.`,
+        'Set expectations for outcomes and timeline.',
+      ],
+    },
+    {
+      heading: `${topic} Audit Framework`,
+      points: [
+        `Show how to evaluate current pages targeting ${primaryKeyword}.`,
+        'Identify high-priority issues and quick wins.',
+        'Recommend tools, metrics, and reporting cadence.',
+      ],
+    },
+    {
+      heading: `Execution Plan for ${primaryKeyword}`,
+      points: [
+        'Outline on-page, technical, and content actions.',
+        'Explain prioritization based on impact and effort.',
+        'Provide a 30/60/90 day implementation sequence.',
+      ],
+    },
+    {
+      heading: 'Common Mistakes to Avoid',
+      points: [
+        'Highlight thin content and mismatched intent risks.',
+        'Explain metadata and internal linking pitfalls.',
+        'Call out measurement gaps that hide real progress.',
+      ],
+    },
+    {
+      heading: 'Measurement and Optimization Loop',
+      points: [
+        'Define success KPIs and benchmark targets.',
+        'Describe weekly and monthly review workflows.',
+        'Show when to refresh content and iterate structure.',
+      ],
+    },
+  ];
+  const faq = [
+    `How long does ${topic.toLowerCase()} take to show impact?`,
+    `What should I fix first for ${primaryKeyword}?`,
+    `How often should I update pages targeting ${primaryKeyword}?`,
+    `Which KPIs matter most for ${audience}?`,
+  ];
+
+  return {
+    title,
+    metaDescription,
+    sections,
+    faq,
+  };
+}
+
+export function generateAltTextSuggestions(input: {
+  subject: string;
+  context: string;
+  count: string;
+}): AltTextSuggestionsReport {
+  const subject = input.subject.trim() || 'Image';
+  const context = input.context.trim();
+  const count = clampInteger(input.count, 5, 1, 12);
+  const templates = [
+    `${subject}.`,
+    `${subject} for ${context || 'web content'}.`,
+    `Close-up of ${subject.toLowerCase()} used in ${context || 'an article'}.`,
+    `${subject} illustrating ${context || 'SEO guidance'}.`,
+    `Detailed view of ${subject.toLowerCase()} with clear focus and readable context.`,
+    `${subject} shown as part of ${context || 'a tutorial step'}.`,
+  ];
+
+  const suggestions = Array.from({ length: count }).map((_, index) => {
+    const text = fitToMaxLength(templates[index % templates.length], 125);
+    return {
+      text,
+      length: text.length,
+    };
+  });
+
+  return { suggestions };
+}
+
+export function findInternalLinkOpportunities(input: {
+  targetKeywords: string;
+  existingPages: string;
+}): InternalLinkOpportunityReport {
+  const targetKeywords = splitListInput(input.targetKeywords);
+  const ignoredLines: string[] = [];
+  const pages = input.existingPages
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .flatMap((line) => {
+      const [urlPart, titlePart] = line.split('|').map((part) => part.trim());
+      if (!urlPart) {
+        ignoredLines.push(line);
+        return [];
+      }
+
+      try {
+        return [{
+          url: normalizeUrl(urlPart),
+          title: titlePart || urlPart,
+        }];
+      } catch {
+        ignoredLines.push(line);
+        return [];
+      }
+    });
+
+  const opportunities: InternalLinkOpportunity[] = [];
+  const unmatchedKeywords: string[] = [];
+
+  targetKeywords.forEach((keyword) => {
+    const keywordTokens = tokenize(keyword).filter((token) => !CLUSTER_STOP_WORDS.has(token));
+    const matches = pages
+      .map((page) => {
+        const titleTokens = tokenize(page.title);
+        const score = keywordTokens.reduce((total, token) => (
+          titleTokens.includes(token) ? total + 1 : total
+        ), 0);
+
+        return {
+          title: page.title,
+          url: page.url,
+          score,
+        };
+      })
+      .filter((page) => page.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+
+    if (!matches.length) {
+      unmatchedKeywords.push(keyword);
+      return;
+    }
+
+    opportunities.push({
+      keyword,
+      anchorText: titleCase(keyword.toLowerCase()),
+      matches,
+    });
+  });
+
+  return {
+    opportunities,
+    unmatchedKeywords,
+    ignoredLines,
+  };
+}
+
+export function generateOnPageSeoChecklist(input: {
+  pageType: string;
+  goal: string;
+}): OnPageSeoChecklistReport {
+  const pageType = input.pageType.trim() || 'Page';
+  const goal = input.goal.trim() || 'Improve rankings and click-through rate';
+  const sections: ChecklistSection[] = [
+    {
+      heading: 'Metadata',
+      items: [
+        `Write a unique title tag for this ${pageType.toLowerCase()} (40 to 60 characters).`,
+        'Create a compelling meta description (140 to 160 characters).',
+        'Set one canonical URL and confirm indexing directives.',
+      ],
+    },
+    {
+      heading: 'Content Quality',
+      items: [
+        'Match content with search intent and user expectations.',
+        'Use one clear H1 and structured H2 or H3 headings.',
+        `Include primary and related keywords naturally around the goal: ${goal}.`,
+      ],
+    },
+    {
+      heading: 'Technical SEO',
+      items: [
+        'Ensure mobile-friendly layout and strong Core Web Vitals.',
+        'Compress and lazy-load media where possible.',
+        'Add descriptive alt text to meaningful images.',
+      ],
+    },
+    {
+      heading: 'Internal Linking and Tracking',
+      items: [
+        'Link to supporting internal pages with descriptive anchor text.',
+        'Add breadcrumb or contextual links where relevant.',
+        'Track impressions, CTR, and ranking changes weekly.',
+      ],
+    },
+  ];
+
+  return {
+    pageType,
+    goal,
+    sections,
+  };
+}
+
 export function formatJson(input: string) {
   const parsed = JSON.parse(input);
   return JSON.stringify(parsed, null, 2);
