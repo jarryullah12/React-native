@@ -11,7 +11,7 @@ const colors = {
     accent: "#D4A5A5",
     accentForeground: "#FFFFFF",
     border: "#D8D0C5",
-    
+
     tile2: "#E8E2D9",
     tile4: "#E0D7C6",
     tile8: "#F4B894",
@@ -24,9 +24,18 @@ const colors = {
     tile1024: "#7A9977",
     tile2048: "#8B9BB4",
     tileSuper: "#A59CBA",
-    
+
     tileTextLight: "#3A3836",
     tileTextDark: "#FFFFFF",
+
+    easy: "#7A9977",
+    easyBg: "#E5EDE2",
+    medium: "#C9A65A",
+    mediumBg: "#F4EBD3",
+    hard: "#C28288",
+    hardBg: "#F2DDDF",
+    star: "#E0B95C",
+    starInactive: "#D8D0C5",
   },
   dark: {
     background: "#1C1B19",
@@ -56,6 +65,15 @@ const colors = {
 
     tileTextLight: "#EBE3D5",
     tileTextDark: "#FFFFFF",
+
+    easy: "#9DBA9A",
+    easyBg: "#2A3328",
+    medium: "#D4B673",
+    mediumBg: "#33301F",
+    hard: "#D4A2A8",
+    hardBg: "#332224",
+    star: "#E0B95C",
+    starInactive: "#3A3836",
   },
   radius: 12,
 };

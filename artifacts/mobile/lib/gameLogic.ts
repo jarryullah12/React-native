@@ -47,9 +47,10 @@ export function initializeGame(): TileData[] {
   return grid;
 }
 
-export function slide(grid: TileData[], direction: Direction): { newGrid: TileData[], scoreGained: number, moved: boolean } {
+export function slide(grid: TileData[], direction: Direction): { newGrid: TileData[], scoreGained: number, moved: boolean, mergesCount: number } {
   let scoreGained = 0;
   let moved = false;
+  let mergesCount = 0;
   
   // Clone grid to work with
   let currentGrid = [...grid].map(t => ({ ...t, isMerged: false, isNew: false }));
@@ -80,6 +81,7 @@ export function slide(grid: TileData[], direction: Direction): { newGrid: TileDa
         // Keep the prevTile id, update score
         scoreGained += prevTile.value;
         moved = true;
+        mergesCount++;
       } else {
         newLine.push({ ...tile });
       }
@@ -100,7 +102,7 @@ export function slide(grid: TileData[], direction: Direction): { newGrid: TileDa
     }
   }
 
-  return { newGrid: nextGrid, scoreGained, moved };
+  return { newGrid: nextGrid, scoreGained, moved, mergesCount };
 }
 
 export function isGameOver(grid: TileData[]): boolean {
@@ -125,4 +127,9 @@ export function isGameOver(grid: TileData[]): boolean {
   }
 
   return true;
+}
+
+export function highestTile(grid: TileData[]): number {
+  if (grid.length === 0) return 0;
+  return Math.max(...grid.map(t => t.value));
 }
