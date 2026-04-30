@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TileData, Direction, initializeGame, slide, spawnTile, isGameOver, highestTile } from '../lib/gameLogic';
 import { LEVELS, Level } from '../lib/levels';
 import * as Haptics from 'expo-haptics';
+import { useTheme } from './ThemeContext';
 
 interface HistorySnapshot {
   grid: TileData[];
@@ -51,12 +52,13 @@ const GameContext = createContext<GameContextValue | null>(null);
 const PROGRESS_KEY = 'levelProgress';
 
 export function GameProvider({ children }: { children: ReactNode }) {
+  const { theme, toggleTheme } = useTheme();
+
   const [grid, setGrid] = useState<TileData[]>([]);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [history, setHistory] = useState<HistorySnapshot[]>([]);
   const [gameOver, setGameOver] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const [mode, setMode] = useState<GameMode | null>(null);
   const [currentLevel, setCurrentLevel] = useState<Level | null>(null);
@@ -73,16 +75,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (mode === 'free' && score > bestScore) {
       setBestScore(score);
-      AsyncStorage.setItem('bestScore', score.toString());
+      AsyncStorage.setItem('bestScore', score.toString()).catch(() => {});
     }
   }, [score, bestScore, mode]);
 
   const loadPersistedData = async () => {
     try {
-      const savedTheme = await AsyncStorage.getItem('theme');
-      if (savedTheme === 'dark' || savedTheme === 'light') {
-        setTheme(savedTheme);
-      }
       const savedBest = await AsyncStorage.getItem('bestScore');
       if (savedBest) {
         setBestScore(parseInt(savedBest, 10));
@@ -226,12 +224,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setGameOver(false);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
   }, [history, mode, levelStatus]);
-
-  const toggleTheme = useCallback(() => {
-    const nextTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(nextTheme);
-    AsyncStorage.setItem('theme', nextTheme).catch(() => {});
-  }, [theme]);
 
   const movesRemaining = currentLevel ? Math.max(0, currentLevel.moveLimit - movesUsed) : null;
   const totalStars = Object.values(levelProgress).reduce((sum, p) => sum + p.stars, 0);

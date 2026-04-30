@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -64,13 +64,16 @@ export default function LevelSelectScreen() {
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: isWeb ? 67 : 0, paddingBottom: isWeb ? 34 : 0 }]}>
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) }]}>
         <View style={styles.topRow}>
-          <View>
-            <Text style={[styles.title, { color: colors.foreground }]}>Zen Merge</Text>
-            <View style={styles.starsRow}>
-              <Feather name={allComplete ? 'award' : 'star'} size={14} color={colors.star} />
-              <Text style={[styles.starsText, { color: colors.mutedForeground }]}>
-                {totalStars} / 300
-              </Text>
+          <View style={styles.brandRow}>
+            <Image source={require('../assets/images/icon.png')} style={styles.logoImg} />
+            <View>
+              <Text style={[styles.title, { color: colors.foreground }]}>Zen Merge</Text>
+              <View style={styles.starsRow}>
+                <Feather name={allComplete ? 'award' : 'star'} size={14} color={colors.star} />
+                <Text style={[styles.starsText, { color: colors.mutedForeground }]}>
+                  {totalStars} / 300
+                </Text>
+              </View>
             </View>
           </View>
           <TouchableOpacity
@@ -177,8 +180,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  logoImg: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+  },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontFamily: 'Inter_700Bold',
   },
   starsRow: {
