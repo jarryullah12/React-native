@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader } from "@/components/Loader";
 import { GameProvider } from "@/contexts/GameContext";
+import { MusicProvider } from "@/contexts/MusicContext";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -60,9 +61,11 @@ function AppShell() {
       <QueryClientProvider client={queryClient}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <KeyboardProvider>
-            <GameProvider>
-              <RootLayoutNav />
-            </GameProvider>
+            <MusicProvider>
+              <GameProvider>
+                <RootLayoutNav />
+              </GameProvider>
+            </MusicProvider>
           </KeyboardProvider>
         </GestureHandlerRootView>
       </QueryClientProvider>

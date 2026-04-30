@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '../contexts/GameContext';
+import { useMusic } from '../contexts/MusicContext';
 import { useColors } from '../hooks/useColors';
 
 function objectiveText(level: NonNullable<ReturnType<typeof useGame>['currentLevel']>): string {
@@ -26,6 +27,7 @@ export function LevelHeader() {
     theme,
     toggleTheme,
   } = useGame();
+  const { enabled: musicEnabled, toggleMusic } = useMusic();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -69,12 +71,20 @@ export function LevelHeader() {
             <Text style={[styles.diffPillText, { color: diffColor }]}>{diffLabel}</Text>
           </View>
         </View>
-        <TouchableOpacity
-          onPress={toggleTheme}
-          style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}
-        >
-          <Feather name={theme === 'dark' ? 'sun' : 'moon'} size={20} color={colors.foreground} />
-        </TouchableOpacity>
+        <View style={styles.rightControls}>
+          <TouchableOpacity
+            onPress={toggleMusic}
+            style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}
+          >
+            <Feather name={musicEnabled ? 'volume-2' : 'volume-x'} size={18} color={colors.foreground} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={toggleTheme}
+            style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}
+          >
+            <Feather name={theme === 'dark' ? 'sun' : 'moon'} size={20} color={colors.foreground} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={[styles.objectiveBox, { backgroundColor: colors.card, borderRadius: colors.radius }]}>
@@ -142,6 +152,10 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  rightControls: {
+    flexDirection: 'row',
+    gap: 8,
   },
   centerCol: {
     alignItems: 'center',

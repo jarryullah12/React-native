@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/contexts/GameContext';
+import { useMusic } from '@/contexts/MusicContext';
 import { LEVELS, Level, Difficulty } from '@/lib/levels';
 
 const DIFFICULTIES: { key: Difficulty; label: string }[] = [
@@ -41,6 +42,7 @@ export default function LevelSelectScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { levelProgress, totalStars, theme, toggleTheme } = useGame();
+  const { enabled: musicEnabled, toggleMusic } = useMusic();
   const isWeb = Platform.OS === 'web';
 
   const grouped = useMemo(() => {
@@ -76,12 +78,20 @@ export default function LevelSelectScreen() {
               </View>
             </View>
           </View>
-          <TouchableOpacity
-            onPress={toggleTheme}
-            style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}
-          >
-            <Feather name={theme === 'dark' ? 'sun' : 'moon'} size={20} color={colors.foreground} />
-          </TouchableOpacity>
+          <View style={styles.headerControls}>
+            <TouchableOpacity
+              onPress={toggleMusic}
+              style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}
+            >
+              <Feather name={musicEnabled ? 'volume-2' : 'volume-x'} size={18} color={colors.foreground} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={toggleTheme}
+              style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}
+            >
+              <Feather name={theme === 'dark' ? 'sun' : 'moon'} size={20} color={colors.foreground} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -209,6 +219,10 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  headerControls: {
+    flexDirection: 'row',
+    gap: 8,
   },
   scrollContent: {
     paddingHorizontal: 20,

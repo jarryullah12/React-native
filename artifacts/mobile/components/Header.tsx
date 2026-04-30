@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useGame } from '../contexts/GameContext';
+import { useMusic } from '../contexts/MusicContext';
 import { useColors } from '../hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function Header() {
   const { score, bestScore, moveHistoryCount, undo, newGame, theme, toggleTheme } = useGame();
+  const { enabled: musicEnabled, toggleMusic } = useMusic();
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
@@ -15,6 +17,9 @@ export function Header() {
       <View style={styles.topRow}>
         <Text style={[styles.title, { color: colors.foreground }]}>Zen Merge</Text>
         <View style={styles.controls}>
+          <TouchableOpacity onPress={toggleMusic} style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}>
+            <Feather name={musicEnabled ? 'volume-2' : 'volume-x'} size={20} color={colors.foreground} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={toggleTheme} style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}>
             <Feather name={theme === 'dark' ? 'sun' : 'moon'} size={20} color={colors.foreground} />
           </TouchableOpacity>
