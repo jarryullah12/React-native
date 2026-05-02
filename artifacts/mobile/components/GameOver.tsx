@@ -14,7 +14,7 @@ import { useColors } from '../hooks/useColors';
 import { Feather } from '@expo/vector-icons';
 
 export function GameOver() {
-  const { gameOver, score, bestScore, newGame } = useGame();
+  const { gameOver, score, bestScore, coins, newGame } = useGame();
   const colors = useColors();
   const opacity = useSharedValue(0);
   const modalScale = useSharedValue(0.9);
@@ -83,6 +83,11 @@ export function GameOver() {
           <View style={styles.statBlock}>
             <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>BEST</Text>
             <Text style={[styles.statValue, { color: colors.foreground }]}>{bestScore}</Text>
+          </View>
+          <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+          <View style={styles.statBlock}>
+            <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>COINS</Text>
+            <Text style={[styles.statValue, { color: (colors as any).coin }]}>{coins}</Text>
           </View>
         </View>
 

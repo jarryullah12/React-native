@@ -16,16 +16,8 @@ function objectiveText(level: NonNullable<ReturnType<typeof useGame>['currentLev
 
 export function LevelHeader() {
   const {
-    currentLevel,
-    score,
-    movesRemaining,
-    movesUsed,
-    mergesCount,
-    moveHistoryCount,
-    undo,
-    restartLevel,
-    theme,
-    toggleTheme,
+    currentLevel, score, coins, movesRemaining, movesUsed, mergesCount,
+    moveHistoryCount, undo, restartLevel, theme, toggleTheme, dangerWarning,
   } = useGame();
   const { enabled: musicEnabled, toggleMusic } = useMusic();
   const colors = useColors();
@@ -35,26 +27,20 @@ export function LevelHeader() {
   if (!currentLevel) return null;
 
   const diffColor =
-    currentLevel.difficulty === 'easy'
-      ? colors.easy
-      : currentLevel.difficulty === 'medium'
-      ? colors.medium
-      : colors.hard;
+    currentLevel.difficulty === 'easy' ? colors.easy
+    : currentLevel.difficulty === 'medium' ? colors.medium
+    : colors.hard;
   const diffBg =
-    currentLevel.difficulty === 'easy'
-      ? colors.easyBg
-      : currentLevel.difficulty === 'medium'
-      ? colors.mediumBg
-      : colors.hardBg;
+    currentLevel.difficulty === 'easy' ? colors.easyBg
+    : currentLevel.difficulty === 'medium' ? colors.mediumBg
+    : colors.hardBg;
   const diffLabel = currentLevel.difficulty.charAt(0).toUpperCase() + currentLevel.difficulty.slice(1);
 
   const obj = currentLevel.objective;
   const objProgress =
-    obj.type === 'score'
-      ? `${score} / ${obj.target}`
-      : obj.type === 'merges'
-      ? `${mergesCount} / ${obj.target}`
-      : `${movesUsed} moves`;
+    obj.type === 'score' ? `${score} / ${obj.target}`
+    : obj.type === 'merges' ? `${mergesCount} / ${obj.target}`
+    : `${movesUsed} moves`;
 
   return (
     <View style={[styles.container, { paddingTop: Math.max(insets.top, 20) }]}>
@@ -65,13 +51,20 @@ export function LevelHeader() {
         >
           <Feather name="chevron-left" size={20} color={colors.foreground} />
         </TouchableOpacity>
+
         <View style={styles.centerCol}>
           <Text style={[styles.levelLabel, { color: colors.mutedForeground }]}>LEVEL {currentLevel.id}</Text>
           <View style={[styles.diffPill, { backgroundColor: diffBg, marginTop: 2 }]}>
             <Text style={[styles.diffPillText, { color: diffColor }]}>{diffLabel}</Text>
           </View>
         </View>
+
         <View style={styles.rightControls}>
+          {dangerWarning && (
+            <View style={[styles.dangerPill, { backgroundColor: '#FF000018' }]}>
+              <Text style={{ fontSize: 12 }}>💣</Text>
+            </View>
+          )}
           <TouchableOpacity
             onPress={toggleMusic}
             style={[styles.iconButton, { backgroundColor: colors.card, borderRadius: colors.radius }]}
@@ -105,6 +98,10 @@ export function LevelHeader() {
           <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>SCORE</Text>
           <Text style={[styles.statValue, { color: colors.foreground }]}>{score}</Text>
         </View>
+        <View style={[styles.statBox, { backgroundColor: (colors as any).coin + '18', borderRadius: colors.radius }]}>
+          <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>COINS</Text>
+          <Text style={[styles.statValue, { color: (colors as any).coin }]}>{coins}</Text>
+        </View>
       </View>
 
       <View style={styles.actionRow}>
@@ -136,7 +133,7 @@ export function LevelHeader() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingBottom: 12,
     width: '100%',
     maxWidth: 500,
     alignSelf: 'center',
@@ -145,17 +142,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 10,
   },
   iconButton: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
   },
   rightControls: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
+    alignItems: 'center',
+  },
+  dangerPill: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   centerCol: {
     alignItems: 'center',
@@ -175,14 +180,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   objectiveBox: {
-    padding: 12,
-    marginBottom: 10,
+    padding: 11,
+    marginBottom: 8,
   },
   objectiveRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   objectiveLabel: {
     fontSize: 10,
@@ -190,9 +195,9 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   objectiveText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Inter_700Bold',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   objectiveProgress: {
     fontSize: 12,
@@ -200,38 +205,38 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginBottom: 10,
+    gap: 8,
+    marginBottom: 8,
   },
   statBox: {
     flex: 1,
-    padding: 10,
+    padding: 9,
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Inter_700Bold',
     letterSpacing: 1,
     marginBottom: 2,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: 'Inter_700Bold',
   },
   actionRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   actionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: 9,
     gap: 6,
   },
   actionText: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 14,
+    fontSize: 13,
   },
 });
