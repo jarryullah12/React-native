@@ -26,14 +26,19 @@ export function LevelHeader() {
 
   if (!currentLevel) return null;
 
+  const c = colors as any;
   const diffColor =
-    currentLevel.difficulty === 'easy' ? colors.easy
-    : currentLevel.difficulty === 'medium' ? colors.medium
-    : colors.hard;
+    currentLevel.difficulty === 'easy' ? c.easy
+    : currentLevel.difficulty === 'medium' ? c.medium
+    : currentLevel.difficulty === 'hard' ? c.hard
+    : currentLevel.difficulty === 'expert' ? c.expert
+    : c.master;
   const diffBg =
-    currentLevel.difficulty === 'easy' ? colors.easyBg
-    : currentLevel.difficulty === 'medium' ? colors.mediumBg
-    : colors.hardBg;
+    currentLevel.difficulty === 'easy' ? c.easyBg
+    : currentLevel.difficulty === 'medium' ? c.mediumBg
+    : currentLevel.difficulty === 'hard' ? c.hardBg
+    : currentLevel.difficulty === 'expert' ? c.expertBg
+    : c.masterBg;
   const diffLabel = currentLevel.difficulty.charAt(0).toUpperCase() + currentLevel.difficulty.slice(1);
 
   const obj = currentLevel.objective;

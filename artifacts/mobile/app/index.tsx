@@ -12,6 +12,8 @@ const DIFFICULTIES: { key: Difficulty; label: string }[] = [
   { key: 'easy', label: 'Easy' },
   { key: 'medium', label: 'Medium' },
   { key: 'hard', label: 'Hard' },
+  { key: 'expert', label: 'Expert' },
+  { key: 'master', label: 'Master' },
 ];
 
 function objectiveLabel(level: Level): string {
@@ -46,7 +48,7 @@ export default function LevelSelectScreen() {
   const isWeb = Platform.OS === 'web';
 
   const grouped = useMemo(() => {
-    const groups: Record<Difficulty, Level[]> = { easy: [], medium: [], hard: [] };
+    const groups: Record<Difficulty, Level[]> = { easy: [], medium: [], hard: [], expert: [], master: [] };
     LEVELS.forEach(l => groups[l.difficulty].push(l));
     return groups;
   }, []);
@@ -55,12 +57,15 @@ export default function LevelSelectScreen() {
   const completedCount = (diff: Difficulty) =>
     grouped[diff].filter(l => (levelProgress[l.id]?.stars ?? 0) > 0).length;
 
+  const c = colors as any;
   const diffColor = (d: Difficulty) =>
-    d === 'easy' ? colors.easy : d === 'medium' ? colors.medium : colors.hard;
+    d === 'easy' ? c.easy : d === 'medium' ? c.medium : d === 'hard' ? c.hard
+    : d === 'expert' ? c.expert : c.master;
   const diffBg = (d: Difficulty) =>
-    d === 'easy' ? colors.easyBg : d === 'medium' ? colors.mediumBg : colors.hardBg;
+    d === 'easy' ? c.easyBg : d === 'medium' ? c.mediumBg : d === 'hard' ? c.hardBg
+    : d === 'expert' ? c.expertBg : c.masterBg;
 
-  const allComplete = totalStars >= 300;
+  const allComplete = totalStars >= 600;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: isWeb ? 67 : 0, paddingBottom: isWeb ? 34 : 0 }]}>
@@ -73,7 +78,7 @@ export default function LevelSelectScreen() {
               <View style={styles.starsRow}>
                 <Feather name={allComplete ? 'award' : 'star'} size={14} color={colors.star} />
                 <Text style={[styles.starsText, { color: colors.mutedForeground }]}>
-                  {totalStars} / 300
+                  {totalStars} / 600
                 </Text>
               </View>
             </View>
