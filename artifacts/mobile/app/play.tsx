@@ -5,6 +5,7 @@ import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/contexts/GameContext';
 import { Header } from '@/components/Header';
 import { Board } from '@/components/Board';
+import { DirectionPad } from '@/components/DirectionPad';
 import { GameOver } from '@/components/GameOver';
 import { LevelHeader } from '@/components/LevelHeader';
 import { LevelComplete } from '@/components/LevelComplete';
@@ -51,6 +52,7 @@ export default function PlayScreen() {
       <View style={styles.boardContainer}>
         <Board />
       </View>
+      <DirectionPad />
       {isLevel ? (
         <>
           <LevelComplete />
@@ -70,6 +72,7 @@ const styles = StyleSheet.create({
   boardContainer: {
     flex: 1,
     justifyContent: 'center',
-    paddingBottom: 40,
+    flexShrink: 1,
+    minHeight: 0,
   },
 });

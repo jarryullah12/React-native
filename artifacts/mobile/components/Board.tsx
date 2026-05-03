@@ -1,17 +1,20 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useGame } from '../contexts/GameContext';
 import { GRID_SIZE } from '../lib/gameLogic';
 import { Tile, getTileSize, BOARD_PADDING, GAP } from './Tile';
 import { useColors } from '../hooks/useColors';
 
+// Approximate pixels consumed by LevelHeader + DirectionPad + padding
+const CHROME_HEIGHT = 390;
+
 export function Board() {
-  const { grid, move } = useGame();
-  const { width } = useWindowDimensions();
+  const { grid } = useGame();
+  const { width, height } = useWindowDimensions();
   const colors = useColors();
 
-  const tileSize = getTileSize(width);
+  const availableHeight = Math.max(height - CHROME_HEIGHT, 200);
+  const tileSize = getTileSize(width, availableHeight);
   const boardSize = tileSize * GRID_SIZE + GAP * (GRID_SIZE + 1);
   const dotSize = Math.max(6, Math.round(tileSize * 0.12));
 
@@ -50,34 +53,15 @@ export function Board() {
     return cells;
   }, [tileSize, colors, dotSize]);
 
-  const panGesture = Gesture.Pan()
-    .onEnd((e) => {
-      const { translationX, translationY } = e;
-      const absX = Math.abs(translationX);
-      const absY = Math.abs(translationY);
-
-      if (Math.max(absX, absY) > 30) {
-        if (absX > absY) {
-          if (translationX > 0) move('RIGHT');
-          else move('LEFT');
-        } else {
-          if (translationY > 0) move('DOWN');
-          else move('UP');
-        }
-      }
-    });
-
   return (
-    <GestureDetector gesture={panGesture}>
-      <View style={[styles.container, { padding: BOARD_PADDING }]}>
-        <View style={[styles.board, { width: boardSize, height: boardSize, backgroundColor: colors.boardBg, borderRadius: colors.radius + 4 }]}>
-          {backgroundCells}
-          {grid.map(tile => (
-            <Tile key={tile.id} tile={tile} tileSize={tileSize} />
-          ))}
-        </View>
+    <View style={[styles.container, { padding: BOARD_PADDING }]}>
+      <View style={[styles.board, { width: boardSize, height: boardSize, backgroundColor: colors.boardBg, borderRadius: colors.radius + 4 }]}>
+        {backgroundCells}
+        {grid.map(tile => (
+          <Tile key={tile.id} tile={tile} tileSize={tileSize} />
+        ))}
       </View>
-    </GestureDetector>
+    </View>
   );
 }
 

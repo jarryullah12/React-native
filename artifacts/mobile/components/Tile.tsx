@@ -14,9 +14,14 @@ import { useColors } from '../hooks/useColors';
 export const BOARD_PADDING = 16;
 export const GAP = 8;
 
-export function getTileSize(screenWidth: number) {
+export function getTileSize(screenWidth: number, availableHeight?: number) {
   const maxBoardWidth = Math.min(screenWidth, 500);
-  return (maxBoardWidth - BOARD_PADDING * 2 - GAP * (GRID_SIZE + 1)) / GRID_SIZE;
+  const fromWidth = (maxBoardWidth - BOARD_PADDING * 2 - GAP * (GRID_SIZE + 1)) / GRID_SIZE;
+  if (availableHeight != null) {
+    const fromHeight = (availableHeight - BOARD_PADDING * 2 - GAP * (GRID_SIZE + 1)) / GRID_SIZE;
+    return Math.min(fromWidth, fromHeight);
+  }
+  return fromWidth;
 }
 
 function DangerTileInner({ value, tileSize, colors }: { value: number; tileSize: number; colors: any }) {
