@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image }
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useColors } from '@/hooks/useColors';
-import { useGame } from '@/contexts/GameContext';
-import { useMusic } from '@/contexts/MusicContext';
-import { LEVELS, Level, Difficulty } from '@/lib/levels';
+import { useColors } from '../hooks/useColors';
+import { useGame } from '../contexts/GameContext';
+import { useMusic } from '../contexts/MusicContext';
+import { LEVELS, Level, Difficulty } from '../lib/levels';
 
 const DIFFICULTIES: { key: Difficulty; label: string }[] = [
   { key: 'easy', label: 'Easy' },

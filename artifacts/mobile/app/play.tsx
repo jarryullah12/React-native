@@ -1,15 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useColors } from '@/hooks/useColors';
-import { useGame } from '@/contexts/GameContext';
-import { Header } from '@/components/Header';
-import { Board } from '@/components/Board';
-import { DirectionPad } from '@/components/DirectionPad';
-import { GameOver } from '@/components/GameOver';
-import { LevelHeader } from '@/components/LevelHeader';
-import { LevelComplete } from '@/components/LevelComplete';
-import { LevelFailed } from '@/components/LevelFailed';
+import { useColors } from '../hooks/useColors';
+import { useGame } from '../contexts/GameContext';
+import { Header } from '../components/Header';
+import { Board } from '../components/Board';
+import { DirectionPad } from '../components/DirectionPad';
+import { GameOver } from '../components/GameOver';
+import { LevelHeader } from '../components/LevelHeader';
+import { LevelComplete } from '../components/LevelComplete';
+import { LevelFailed } from '../components/LevelFailed';
 
 export default function PlayScreen() {
   const params = useLocalSearchParams<{ mode?: string; levelId?: string }>();

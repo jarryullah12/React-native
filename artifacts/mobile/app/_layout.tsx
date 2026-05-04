@@ -13,11 +13,11 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { Loader } from "@/components/Loader";
-import { GameProvider } from "@/contexts/GameContext";
-import { MusicProvider } from "@/contexts/MusicContext";
-import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import { ErrorBoundary } from "../components/ErrorBoundary";
+import { Loader } from "../components/Loader";
+import { GameProvider } from "../contexts/GameContext";
+import { MusicProvider } from "../contexts/MusicContext";
+import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 

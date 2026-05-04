@@ -3,12 +3,25 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
-    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "start": "npm run expo:dev",
+    "build": "npm run typecheck && npm run build --workspaces --if-present",
+    "mobile:dev": "npm run dev --workspace=@workspace/mobile",
+    "mobile:build": "npm run build --workspace=@workspace/mobile",
+    "mobile:typecheck": "npm run typecheck --workspace=@workspace/mobile",
+    "expo:dev": "expo start ./artifacts/mobile --localhost",
+    "expo:dev:clear": "expo start ./artifacts/mobile --localhost --clear",
+    "expo:android": "expo start ./artifacts/mobile --android --localhost",
+    "expo:ios": "expo start ./artifacts/mobile --ios --localhost",
+    "expo:web": "expo start ./artifacts/mobile --web --localhost",
     "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+    "typecheck": "npm run typecheck:libs && npm run typecheck --workspaces --if-present"
   },
   "private": true,
+  "workspaces": [
+    "artifacts/*",
+    "lib/*",
+    "scripts"
+  ],
   "devDependencies": {
     "typescript": "~5.9.2",
     "prettier": "^3.8.1"
